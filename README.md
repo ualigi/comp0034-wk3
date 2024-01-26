@@ -322,8 +322,8 @@ from Flask import request
 @app.post('/events')
 def add_event():
     """ Adds a new event.
-    
-    Gets the JSON data from the request body and uses this to deserialise JSON to an object using Marshmallow 
+
+    Gets the JSON data from the request body and uses this to deserialise JSON to an object using Marshmallow
     event_schema.load()
 
     :returns: JSON"""
