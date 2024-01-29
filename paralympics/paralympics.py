@@ -69,7 +69,7 @@ def get_region(NOC):
 
 @app.post("/events")
 def add_events():
-    from Flask import request
+    from flask import request
     """ Adds a new event.
 
     Gets the JSON data from the request body and uses this to deserialise JSON to an object using Marshmallow
@@ -85,7 +85,7 @@ def add_events():
 
 @app.post('/regions')
 def add_regions():
-    from Flask import request
+    from flask import request
     """ Adds a new region.
 
     Gets the JSON data from the request body and uses this to deserialise JSON to an object using Marshmallow
@@ -131,7 +131,7 @@ def delete_region(NOC):
 
 @app.patch("/events/<event_id>")
 def event_update(event_id):
-    from Flask import request
+    from flask import request
     """Updates changed fields for the event.
 
     """
@@ -151,6 +151,32 @@ def event_update(event_id):
         db.select(Event).filter_by(event_id=event_id)
     ).scalar_one_or_none()
     result = event_schema.jsonify(updated_event)
+    response = make_response(result, 200)
+    response.headers["Content-Type"] = "application/json"
+    return response
+
+@app.patch("/regions/<NOC>")
+def region_update(NOC):
+    from flask import request
+    """Updates changed fields for the event.
+
+    """
+    # Find the event in the database
+    existing_region = db.session.execute(
+        db.select(Region).filter_by(NOC=NOC)
+    ).scalar_one()
+    # Get the updated details from the json sent in the HTTP patch request
+    region_json = request.get_json()
+    # Use Marshmallow to update the existing records with the changes from the json
+    region_updated = region_schema.load(region_json, instance=existing_region, partial=True)
+    # Commit the changes to the database
+    db.session.add(region_updated)
+    db.session.commit()
+    # Return json showing the updated record
+    updated_region = db.session.execute(
+        db.select(Region).filter_by(NOC=NOC)
+    ).scalar_one()
+    result = region_schema.jsonify(updated_region)
     response = make_response(result, 200)
     response.headers["Content-Type"] = "application/json"
     return response
